@@ -32,7 +32,16 @@ setup_info = {
     "install_requires": [
         "httpx",
         "python-dateutil"
-    ]
+    ],
+    "extras_require": {
+        'testing': [
+            "pytest",
+            "pytest-vcr",
+            "pytest-asyncio",
+            "loguru",
+            "pytest-cov",
+        ]
+    }
 }
 
 
