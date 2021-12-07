@@ -3,3 +3,4 @@ pytest-vcr
 pytest-asyncio
 pytest-cov
 python-dateutil
+httpx
