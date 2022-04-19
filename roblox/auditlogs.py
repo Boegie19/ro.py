@@ -4,6 +4,7 @@ from enum import Enum
 from dateutil.parser import parse
 
 from roblox.members import Member
+from roblox.partials.partialbadge import TypePartialBadge
 from roblox.partials.partialrole import PartialRole
 from roblox.partials.partialuser import PartialUser
 from roblox.utilities.shared import ClientSharedObject
@@ -60,15 +61,13 @@ class Actions(Enum):
     update_roleset_data = "UpdateRolesetData"
 
 
-class DeletePost:
+class AuditLog:
     """
-    Represents a badge from the API.
-
     Attributes:
         actor: Member who did it.
         action_type: Type of the action
         created: Datetime of creation of the audit_log
-        target: The user who posted the post.
+        group: the group that this audit_log comes form
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -84,20 +83,32 @@ class DeletePost:
         self.action_type: str = data["actionType"]
         self.created: datetime = parse(data["created"])
 
-        self.target: PartialUser = PartialUser(shared=shared, data={"Id": data["description"]["TargetId"],
-                                                                    "Name": data["description"]["TargetName"]})
+    def __repr__(self):
+        return f"<{self.__class__.__name__} actor={self.actor} action_type={self.action_type!r}"
+
+
+class DeletePost(AuditLog):
+    """
+    Attributes:
+        description: The post description.
+    """
+
+    def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
+        """
+        Arguments:
+            shared: The ClientSharedObject to be used when getting information on badges.
+            data: The data from the endpoint.
+            group: the group you have the audit logs from
+        """
+        super().__init__(shared=shared, data=data, group=group)
+
+        self.target: PartialUser = PartialUser(shared=shared, data=data["description"])
         self.description: str = data["description"]["PostDesc"]
 
 
-class RemoveMember:
+class RemoveMember(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action
-        created: Datetime of creation of the audit_log
-        target: User that was removed.
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -107,25 +118,14 @@ class RemoveMember:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
-        self.target: PartialUser = PartialUser(shared=shared, data={"Id": data["description"]["TargetId"],
-                                                                    "Name": data["description"]["TargetName"]})
+        self.target: PartialUser = PartialUser(shared=shared, data=data["description"])
 
 
-class AcceptJoinRequest:
+class AcceptJoinRequest(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action
-        created: Datetime of creation of the audit_log
-        target: User who send the join request.
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -135,25 +135,14 @@ class AcceptJoinRequest:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
-        self.target: PartialUser = PartialUser(shared=shared, data={"Id": data["description"]["TargetId"],
-                                                                    "Name": data["description"]["TargetName"]})
+        self.target: PartialUser = PartialUser(shared=shared, data=data["description"])
 
 
-class DeclineJoinRequest:
+class DeclineJoinRequest(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action
-        created: Datetime of creation of the audit_log
-        target: User who send the join request.
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -163,25 +152,14 @@ class DeclineJoinRequest:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
-        self.target: PartialUser = PartialUser(shared=shared, data={"Id": data["description"]["TargetId"],
-                                                                    "Name": data["description"]["TargetName"]})
+        self.target: PartialUser = PartialUser(shared=shared, data=data["description"])
 
 
-class PostStatus:
+class PostStatus(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action
-        created: Datetime of creation of the audit_log
-        text: text
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -191,26 +169,15 @@ class PostStatus:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.text: str = data["description"]["Text"]
 
 
-class ChangeRank:
+class ChangeRank(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: User whose role was changed.
-        new_role: New role the user got.
-        old_role: Old role of the user.
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -220,13 +187,8 @@ class ChangeRank:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
-        self.target: PartialUser = PartialUser(shared=shared, data={"id": data["description"]["TargetId"],
-                                                                    "name": data["description"]["TargetName"]})
+        super().__init__(shared=shared, data=data, group=group)
+        self.target: PartialUser = PartialUser(shared=shared, data=data["description"])
         self.new_role: PartialRole = PartialRole(shared=shared,
                                                  data={"id": data["description"]["NewRoleSetId"],
                                                        "name": data["description"]["NewRoleSetName"]},
@@ -237,18 +199,10 @@ class ChangeRank:
                                                  group=group)
 
 
-class BuyAd:
+class BuyAd(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: User that was removed.
-        name: Name of the ad
-        bid: how much you bid
-        currency_type_id: type of currency id.
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -258,11 +212,7 @@ class BuyAd:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.name: str = data["description"]["AdName"]
         self.bid: int = data["description"]["Bid"]
@@ -270,16 +220,10 @@ class BuyAd:
         # CurrencyTypeName is always an emty string
 
 
-class SendAllyRequest:
+class SendAllyRequest(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: User that was removed.
-        group:  The group that you send an ally request to.
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -290,26 +234,14 @@ class SendAllyRequest:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialgroup import PartialGroup
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
-        self.target: PartialGroup = PartialGroup(shared=shared,
-                                                 data={"id": data["description"]["TargetGroupId"],
-                                                       "name": data["description"]["TargetGroupName"]})
+        super().__init__(shared=shared, data=data, group=group)
+        self.target: PartialGroup = PartialGroup(shared=shared, data=data["description"])
 
 
-class CreateEnemy:
+class CreateEnemy(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: User that was removed.
-        group:  The group that you made your enemy.
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -320,26 +252,14 @@ class CreateEnemy:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialgroup import PartialGroup
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
-        self.target: PartialGroup = PartialGroup(shared=shared,
-                                                 data={"id": data["description"]["TargetGroupId"],
-                                                       "name": data["description"]["TargetGroupName"]})
+        super().__init__(shared=shared, data=data, group=group)
+        self.target: PartialGroup = PartialGroup(shared=shared, data=data["description"])
 
 
-class AcceptAllyRequest:
+class AcceptAllyRequest(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: User that was removed.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -350,26 +270,14 @@ class AcceptAllyRequest:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialgroup import PartialGroup
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
-        self.target: PartialGroup = PartialGroup(shared=shared,
-                                                 data={"id": data["description"]["TargetGroupId"],
-                                                       "name": data["description"]["TargetGroupName"]})
+        super().__init__(shared=shared, data=data, group=group)
+        self.target: PartialGroup = PartialGroup(shared=shared, data=data["description"])
 
 
-class DeclineAllyRequest:
+class DeclineAllyRequest(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: User that was removed.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -380,26 +288,14 @@ class DeclineAllyRequest:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialgroup import PartialGroup
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
-        self.target: PartialGroup = PartialGroup(shared=shared,
-                                                 data={"id": data["description"]["TargetGroupId"],
-                                                       "name": data["description"]["TargetGroupName"]})
+        super().__init__(shared=shared, data=data, group=group)
+        self.target: PartialGroup = PartialGroup(shared=shared, data=data["description"])
 
 
-class DeleteAlly:
+class DeleteAlly(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: Group
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -410,26 +306,14 @@ class DeleteAlly:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialgroup import PartialGroup
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
-        self.target: PartialGroup = PartialGroup(shared=shared,
-                                                 data={"id": data["description"]["TargetGroupId"],
-                                                       "name": data["description"]["TargetGroupName"]})
+        super().__init__(shared=shared, data=data, group=group)
+        self.target: PartialGroup = PartialGroup(shared=shared, data=data["description"])
 
 
-class DeleteEnemy:
+class DeleteEnemy(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        target: Group
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -440,25 +324,14 @@ class DeleteEnemy:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialgroup import PartialGroup
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
-        self.target: PartialGroup = PartialGroup(shared=shared,
-                                                 data={"id": data["description"]["TargetGroupId"],
-                                                       "name": data["description"]["TargetGroupName"]})
+        super().__init__(shared=shared, data=data, group=group)
+        self.target: PartialGroup = PartialGroup(shared=shared, data=data["description"])
 
 
-class AddGroupPlace:
+class AddGroupPlace(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -468,22 +341,13 @@ class AddGroupPlace:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class RemoveGroupPlace:
+class RemoveGroupPlace(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -493,22 +357,13 @@ class RemoveGroupPlace:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class CreateItems:
+class CreateItems(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -519,23 +374,14 @@ class CreateItems:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialasset import PartialAsset
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
         self.asset: PartialAsset = PartialAsset(shared=shared, data=data["description"])
 
 
-class ConfigureItems:
+class ConfigureItems(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -545,22 +391,17 @@ class ConfigureItems:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        from roblox.partials.partialasset import PartialAsset
+
+        super().__init__(shared=shared, data=data, group=group)
+
+        self.asset: PartialAsset = PartialAsset(shared=shared, data=data["description"])
 
 
-class SpendGroupFunds:
+class SpendGroupFunds(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -570,26 +411,17 @@ class SpendGroupFunds:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.amount: int = data["description"]["Amount"]
         self.currency_type_id: int = data["description"]["CurrencyTypeId"]
         self.item_description: int = data["description"]["CurrencyTypeId"]
 
 
-class ChangeOwner:
+class ChangeOwner(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -599,11 +431,7 @@ class ChangeOwner:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.is_roblox: int = data["description"]["IsRoblox"]
         self.old_owner: PartialUser = PartialUser(shared=shared, data={"Id": data["description"]["OldOwnerId"],
@@ -612,15 +440,10 @@ class ChangeOwner:
                                                                        "Name": data["description"]["NewOwnerName"]})
 
 
-class Delete:
+class Delete(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -630,22 +453,13 @@ class Delete:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class AdjustCurrencyAmounts:
+class AdjustCurrencyAmounts(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -655,22 +469,13 @@ class AdjustCurrencyAmounts:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class Abandon:
+class Abandon(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -680,22 +485,13 @@ class Abandon:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class Claim:
+class Claim(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -705,22 +501,13 @@ class Claim:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class Rename:
+class Rename(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -730,22 +517,13 @@ class Rename:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class ChangeDescription:
+class ChangeDescription(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -755,23 +533,14 @@ class ChangeDescription:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
         self.new_description = data["description"]["NewDescription"]
 
 
-class CancelClanInvite:
+class CancelClanInvite(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -781,22 +550,15 @@ class CancelClanInvite:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
+
+        self.target: PartialUser = PartialUser(shared=shared, data=data["description"])
 
 
-class KickFromClan:
+class KickFromClan(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -806,22 +568,13 @@ class KickFromClan:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class BuyClan:
+class BuyClan(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -831,22 +584,14 @@ class BuyClan:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
+        self.text: str = data["description"]["Text"]
 
-class CreateGroupAsset:
+class CreateGroupAsset(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -857,23 +602,14 @@ class CreateGroupAsset:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialasset import VersionPartialAsset
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
         self.asset: VersionPartialAsset = VersionPartialAsset(shared=self.shared, data=data["description"])
 
 
-class UpdateGroupAsset:
+class UpdateGroupAsset(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -884,23 +620,14 @@ class UpdateGroupAsset:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialasset import VersionPartialAsset
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
         self.asset: VersionPartialAsset = VersionPartialAsset(shared=self.shared, data=data["description"])
 
 
-class ConfigureGroupAsset:
+class ConfigureGroupAsset(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -911,23 +638,14 @@ class ConfigureGroupAsset:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialasset import ActionsPartialAsset
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
         self.asset: ActionsPartialAsset = ActionsPartialAsset(shared=self.shared, data=data["description"])
 
 
-class RevertGroupAsset:
+class RevertGroupAsset(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -937,22 +655,13 @@ class RevertGroupAsset:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class CreateGroupDeveloperProduct:
+class CreateGroupDeveloperProduct(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -963,24 +672,15 @@ class CreateGroupDeveloperProduct:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialasset import PartialAsset
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.asset: PartialAsset = PartialAsset(shared=shared, data=data["description"])
 
 
-class ConfigureGroupGame:
+class ConfigureGroupGame(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -991,24 +691,15 @@ class ConfigureGroupGame:
             group: the group you have the audit logs from
         """
         from roblox.partials.partialplace import PartialPlace
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.asset: PartialPlace = PartialPlace(shared=shared, data=data["description"])
 
 
-class Lock:
+class Lock(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1018,24 +709,15 @@ class Lock:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.reason: str = data["description"]["Reason"]
 
 
-class Unlock:
+class Unlock(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1045,22 +727,13 @@ class Unlock:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
 
-class CreateGamePass:
+class CreateGamePass(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1073,25 +746,16 @@ class CreateGamePass:
         from roblox.partials.partialgamepass import PartialGamePass
         from roblox.partials.partialplace import PartialPlace
 
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.gamepass: PartialGamePass = PartialGamePass(shared=self.shared, data=data["description"])
         self.place: PartialPlace = PartialPlace(shared=self.shared, data=data["description"])
 
 
-class CreateBadge:
+class CreateBadge(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1103,24 +767,15 @@ class CreateBadge:
         """
         from roblox.partials.partialbadge import PartialBadge
 
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.badge: PartialBadge = PartialBadge(shared=self.shared, data=data["description"])
 
 
-class ConfigureBadge:
+class ConfigureBadge(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1130,23 +785,15 @@ class ConfigureBadge:
             data: The data from the endpoint.
             group: the group you have the audit logs from
         """
+        super().__init__(shared=shared, data=data, group=group)
 
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        self.badge: TypePartialBadge = TypePartialBadge(shared=shared, data=data["description"])
 
 
-class SavePlace:
+class SavePlace(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1159,24 +806,15 @@ class SavePlace:
 
         from roblox.partials.partialasset import PartialAsset
 
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.asset: PartialAsset = PartialAsset(shared=shared, data=data["description"])
 
 
-class PublishPlace:
+class PublishPlace(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+        asset: The asset being published
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1189,24 +827,15 @@ class PublishPlace:
 
         from roblox.partials.partialasset import PartialAsset
 
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.asset: PartialAsset = PartialAsset(shared=shared, data=data["description"])
 
 
-class UpdateRolesetRank:
+class UpdateRolesetRank(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1219,24 +848,15 @@ class UpdateRolesetRank:
 
         from roblox.partials.partialrole import UpdateRankPartialRole
 
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.asset: UpdateRankPartialRole = UpdateRankPartialRole(shared=shared, data=data["description"], group=group)
 
 
-class UpdateRolesetData:
+class UpdateRolesetData(AuditLog):
     """
-    Represents a badge from the API.
-
     Attributes:
-        actor: Member who did it.
-        action_type: Type of the action.
-        created: Datetime of creation of the audit_log.
-        group:  The group that send you an ally request
+
     """
 
     def __init__(self, shared: ClientSharedObject, data: dict, group: BaseGroup):
@@ -1248,10 +868,6 @@ class UpdateRolesetData:
         """
         from roblox.partials.partialrole import UpdateDataPartialRole
 
-        self.shared: ClientSharedObject = shared
-        self.group: BaseGroup = group
-        self.actor: Member = Member(shared=self.shared, data=data["actor"], group=self.group)
-        self.action_type: str = data["actionType"]
-        self.created: datetime = parse(data["created"])
+        super().__init__(shared=shared, data=data, group=group)
 
         self.asset: UpdateDataPartialRole = UpdateDataPartialRole(shared=shared, data=data["description"], group=group)

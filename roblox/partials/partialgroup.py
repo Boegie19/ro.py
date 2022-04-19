@@ -29,9 +29,9 @@ class PartialGroup(BaseGroup):
         """
         self._shared: ClientSharedObject = shared
 
-        self.id: int = data.get("CreatorTargetId") or data.get("id")
+        self.id: int = data.get("CreatorTargetId") or data.get("id") or data.get("TargetGroupId")
         self.creator: BaseUser = BaseUser(shared=shared, user_id=self.id)
-        self.name: str = data.get("Name") or data.get("name")
+        self.name: str = data.get("Name") or data.get("name") or data.get("TargetGroupName")
 
         super().__init__(shared, self.id)
 

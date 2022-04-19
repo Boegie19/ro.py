@@ -18,7 +18,8 @@ from ..auditlogs import RemoveMember, ChangeRank, DeletePost, AcceptJoinRequest,
     ChangeOwner, ChangeDescription, PostStatus, DeleteEnemy, AddGroupPlace, RemoveGroupPlace, AdjustCurrencyAmounts, \
     Abandon, Claim, Delete, Rename, CancelClanInvite, CreateGroupAsset, BuyClan, UpdateGroupAsset, \
     ConfigureGroupAsset, CreateGroupDeveloperProduct, ConfigureGroupGame, RevertGroupAsset, Lock, Unlock, \
-    CreateGamePass, CreateBadge, ConfigureBadge, SavePlace, PublishPlace, UpdateRolesetRank, UpdateRolesetData
+    CreateGamePass, CreateBadge, ConfigureBadge, SavePlace, PublishPlace, UpdateRolesetRank, UpdateRolesetData, \
+    ConfigureItems
 from ..members import Member, MemberRelationship
 from ..partials.partialuser import PartialUser, RequestedUsernamePartialUser
 from ..roles import Role
@@ -435,6 +436,7 @@ class BaseGroup(BaseItem):
                       "Decline Ally Request": DeclineAllyRequest, "Delete Ally": DeleteAlly,
                       "Delete Enemy": DeleteEnemy, "Add Group Place": AddGroupPlace,
                       "Remove Group Place": RemoveGroupPlace, "Create Items": CreateItems,
+                      "Configure Items": ConfigureItems,
                       "Spend Group Funds": SpendGroupFunds, "Change Owner": ChangeOwner,
                       "Delete": Delete, "Adjust Currency Amounts": AdjustCurrencyAmounts, "Abandon": Abandon,
                       "Claim": Claim, "Rename": Rename, "Change Description": ChangeDescription,
